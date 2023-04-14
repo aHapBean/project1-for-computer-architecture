@@ -3,64 +3,64 @@
 # ID  : 521030910206
 # 4.10
 
-    .pos 0
+    .pos 0 # ??
 init:
     irmovl Stack, %esp
     irmovl Stack, %ebp
     call Main
     halt
 
-    # Sample linked list
-    .align 4 
-ele1:   # ebp
+.align 4
+# Source block
+src:
     .long 0x00a
-    .long ele2
-ele2:
     .long 0x0b0
-    .long ele3
-ele3:
     .long 0xc00
-    .long 0
+# Destination
+dest:
+    .long 0x111
+    .long 0x222
+    .long 0x333
 
 Main:   pushl %ebp
     rrmovl %esp, %ebp 
 
-    irmovl ele1,%edx
+    irmovl $3,%edx
     pushl %edx # copy_block(*src, *dest, len)
+
+    irmovl dest, %edx
+    pushl %edx
+
+    irmovl src, %edx
+    pushl %edx
+
     # put len first and then in the function,it's normal order
-    call rsum
+    call copy_block
     rrmovl %ebp,%esp 
     popl %ebp 
     ret
 
-rsum:   pushl %ebp
+copy_block:   pushl %ebp
     rrmovl %esp, %ebp
 
-    mrmovl 8(%ebp), %ecx # ecx = start,pointer !
-    xorl %edx, %edx # val = 0 可以用栈 
-
-    xorl %ebx, %ebx
-    subl %ebx, %ecx # eax
+    mrmovl 8(%ebp), %esi # ecx = src
+    mrmovl 12(%ebp), %edi # dst
+    mrmovl 16(%ebp), %ecx # len
+    xorl %eax, %eax # res
+    andl %ecx, %ecx
     je ZERO
+Loop:   mrmovl (%esi), %ebx
+    irmovl $4, %edx
+    addl %edx, %esi
+    rmmovl %ebx, (%edi)
+    addl %edx, %edi
+    xorl %ebx, %eax # ebx ^ eax -> eax
+    irmovl $1, %edx
+    subl %edx, %ecx
+    jne Loop
 
-
-    mrmovl (%ecx), %edx
-    pushl %edx # store the res
-    
-    pushl %ebp # preparation
-    rrmovl %esp, %ebp
-
-    mrmovl 4(%ecx), %ecx
-    pushl %ecx
-    call rsum # rsum(*start->next)
-    rrmovl %ebp, %esp # is this normal method to solve the recursive function that
-    # pushl first and when back,the value is backed
-    popl %ebp
-
-    popl %edx # get the previous value
 ZERO:   rrmovl %ebp, %esp
     popl %ebp 
-    addl %edx, %eax # ret += val
     ret
 
 
