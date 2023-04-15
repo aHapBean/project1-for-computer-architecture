@@ -52,6 +52,7 @@ copy_block:   pushl %ebp
 Loop:   mrmovl (%esi), %ebx
     irmovl $4, %edx
     addl %edx, %esi
+    # iaddl $4, %esi # why this can be implemented ??
     rmmovl %ebx, (%edi)
     addl %edx, %edi
     xorl %ebx, %eax # ebx ^ eax -> eax

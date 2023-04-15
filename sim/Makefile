@@ -1,6 +1,6 @@
 # Comment this out if you don't have Tcl/Tk on your system
 
-#GUIMODE=-DHAS_GUI
+# GUIMODE=-DHAS_GUI
 
 # Modify the following line so that gcc can find the libtcl.so and
 # libtk.so libraries on your system. You may need to use the -L option
@@ -14,6 +14,12 @@ TKLIBS=-L/usr/lib -ltk8.5 -ltcl8.5
 # Tcl/Tk.
 
 TKINC=-isystem /usr/include／tcl8.5
+# TKLIBS=-L/usr/lib/x86_64-linux-gnu -ltk8.6 -ltcl8.6
+# TKINC=-I/usr/include/tcl8.6
+
+
+# TKLIBS=-L/usr/local/lib -ltk8.6 -ltcl8.6
+# TKINC=-I/usr/local/include
 
 ##################################################
 # You shouldn't need to modify anything below here

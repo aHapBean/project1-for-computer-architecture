@@ -7,9 +7,7 @@
 ## Your task is to implement the iaddl instruction
 ## The file contains a declaration of the icodes
 ## for iaddl (IIADDL) .
-## Your job is to 
- ################ add the rest of the logic to make it work ###################
-
+## Your job is to add the rest of the logic to make it work
 
 ####################################################################
 #    C Include's.  Don't alter these                               #
@@ -109,29 +107,29 @@ int ifun = [
 
 bool instr_valid = icode in 
 	{ INOP, IHALT, IRRMOVL, IIRMOVL, IRMMOVL, IMRMOVL,
-	       IOPL, IJXX, ICALL, IRET, IPUSHL, IPOPL, IIADDL }; # IADDL
+	       IOPL, IJXX, ICALL, IRET, IPUSHL, IPOPL };
 
 # Does fetched instruction require a regid byte?
 bool need_regids =
 	icode in { IRRMOVL, IOPL, IPUSHL, IPOPL, 
-		     IIRMOVL, IRMMOVL, IMRMOVL, IIADDL }; # tag
+		     IIRMOVL, IRMMOVL, IMRMOVL };
 
 # Does fetched instruction require a constant word?
 bool need_valC =
-	icode in { IIRMOVL, IRMMOVL, IMRMOVL, IJXX, ICALL, IIADDL}; # added /*, IIADDL */
+	icode in { IIRMOVL, IRMMOVL, IMRMOVL, IJXX, ICALL };
 
 ################ Decode Stage    ###################################
 
 ## What register should be used as the A source?
 int srcA = [
-	icode in { IRRMOVL, IRMMOVL, IOPL, IPUSHL  } : rA; # 这ra应该是直接由硬件给出来的指令里面的编号，作为输入，决定valA (srcA -> 硬件 -> valA)，所以也没写出
+	icode in { IRRMOVL, IRMMOVL, IOPL, IPUSHL  } : rA;
 	icode in { IPOPL, IRET } : RESP;
 	1 : RNONE; # Don't need register
-];# tag RNONE
+];
 
 ## What register should be used as the B source?
 int srcB = [
-	icode in { IOPL, IRMMOVL, IMRMOVL, IIADDL } : rB; # tag
+	icode in { IOPL, IRMMOVL, IMRMOVL  } : rB;
 	icode in { IPUSHL, IPOPL, ICALL, IRET } : RESP;
 	1 : RNONE;  # Don't need register
 ];
@@ -139,7 +137,7 @@ int srcB = [
 ## What register should be used as the E destination?
 int dstE = [
 	icode in { IRRMOVL } && Cnd : rB;
-	icode in { IIRMOVL, IOPL, IIADDL} : rB; # tag
+	icode in { IIRMOVL, IOPL} : rB;
 	icode in { IPUSHL, IPOPL, ICALL, IRET } : RESP;
 	1 : RNONE;  # Don't write any register
 ];
@@ -155,7 +153,7 @@ int dstM = [
 ## Select input A to ALU
 int aluA = [
 	icode in { IRRMOVL, IOPL } : valA;
-	icode in { IIRMOVL, IRMMOVL, IMRMOVL, IIADDL } : valC; # tag,这个valC怎么解码的？？？？？？虽然是硬件，但是它怎么知道几字节
+	icode in { IIRMOVL, IRMMOVL, IMRMOVL } : valC;
 	icode in { ICALL, IPUSHL } : -4;
 	icode in { IRET, IPOPL } : 4;
 	# Other instructions don't need ALU
@@ -164,19 +162,19 @@ int aluA = [
 ## Select input B to ALU
 int aluB = [
 	icode in { IRMMOVL, IMRMOVL, IOPL, ICALL, 
-		      IPUSHL, IRET, IPOPL, IIADDL } : valB; # tag
+		      IPUSHL, IRET, IPOPL } : valB;
 	icode in { IRRMOVL, IIRMOVL } : 0;
 	# Other instructions don't need ALU
 ];
 
 ## Set the ALU function
 int alufun = [
-	icode in {IOPL, IIADDL}  : ifun;
-	1 : ALUADD; # tag
+	icode == IOPL : ifun;
+	1 : ALUADD;
 ];
 
 ## Should the condition codes be updated?
-bool set_cc = icode in { IOPL, IIADDL}; # tag !
+bool set_cc = icode in { IOPL };
 
 ################ Memory Stage    ###################################
 
@@ -188,7 +186,7 @@ bool mem_write = icode in { IRMMOVL, IPUSHL, ICALL };
 
 ## Select memory address
 int mem_addr = [
-	icode in { IRMMOVL, IPUSHL, ICALL, IMRMOVL } : valE; # valE 在哪里被赋值？？？？
+	icode in { IRMMOVL, IPUSHL, ICALL, IMRMOVL } : valE;
 	icode in { IPOPL, IRET } : valA;
 	# Other instructions don't need address
 ];
